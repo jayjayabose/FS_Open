@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Note from './components/Note';
+import noteService from './services/notes';
 import axios from 'axios';
 /*
 
@@ -21,38 +22,33 @@ function App(props) {
     ? notes
     : notes.filter((note) => note.important);
 
-  // useEffect(() => {
-  //   console.log('effect');
-  //   axios.get('http://localhost:3001/notes').then((response) => {
-  //     console.log('promise fulfilled')
-  //     setNotes(response.data);
-  //     console.log(dbNotes);
-  //   });
-  // }, []);
-
   useEffect(() => {
     (async () => {
-      let response = await axios.get('http://localhost:3001/notes');
-      setNotes(response.data);
+      try {
+        let response = await axios.get('http://localhost:3001/notes');
+        setNotes(response.data);
+      } catch (error) {
+        console.error('error: getting notes', error);
+      }
     })();
   }, []);
 
-  function addNote(event) {
+  async function addNote(event) {
     event.preventDefault();
     const newNoteObj = {
       id: notes.length + 1,
       content: newNote,
       important: Math.random() < 0.5,
     };
-    // setNotes(notes.concat(newNoteObj));
 
-    axios
-      .post('http://localhost:3001/notes', newNoteObj) // post writes to database
-      .then((response) => {
-        console.log(response);
-        setNewNote('');
-        setNotes(notes.concat(response.data)); // update state (not from the datbase)
-      });
+  try {
+    const response = await axios.post('http://localhost:3001/notes', newNoteObj); // post writes to database
+    setNewNote('');
+    setNotes(notes.concat(response.data)); // update state (not from the datbase)
+  } catch (error) {
+    console.error('error: adding note', error);
+  }
+
   }
 
   function handleNoteChange(event) {
@@ -60,7 +56,7 @@ function App(props) {
     setNewNote(event.target.value);
   }
 
-  function toggleImportance(id) {
+  async function toggleImportance(id) {
     // find the note in state: array of notes
     const note = notes.find((note) => note.id === id);
 
@@ -70,21 +66,22 @@ function App(props) {
       important: !note.important,
     };
 
-    // update the database
-    axios
-      .put(`http://localhost:3001/notes/${id}`, newNoteObj)
-      .then((response) => {
-        console.log(response);
-        // then update state
-        // create a new array. never mutate state
-        const newNotes = notes.map((note) => {
-          if (note.id === id) {
-            return newNoteObj;
-          }
-          return note;
-        });
-        setNotes(newNotes);
+    try {
+      // update the database  
+      await axios.put(`http://localhost:3001/notes/${id}`, newNoteObj);
+  
+      // then update state
+      // create a new array. never mutate state
+      const newNotes = notes.map((note) => {
+        if (note.id === id) {
+          return newNoteObj;
+        }
+        return note;
       });
+      setNotes(newNotes);
+    } catch (error) {
+      console.error('error: udpate note importance', error);
+    }
   }
 
   return (
