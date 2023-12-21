@@ -31,19 +31,11 @@ function App(props) {
   // }, []);
 
   useEffect(() => {
-    // async function getNotes() {
-    //   let response = await axios.get('http://localhost:3001/notes');
-    //   setNotes(response.data)
-    // }
-    // getNotes();
     (async () => {
       let response = await axios.get('http://localhost:3001/notes');
-      setNotes(response.data)
-    })()
-    // getNotes();
-  },[]);
-
-
+      setNotes(response.data);
+    })();
+  }, []);
 
   function addNote(event) {
     event.preventDefault();
@@ -52,13 +44,47 @@ function App(props) {
       content: newNote,
       important: Math.random() < 0.5,
     };
-    setNotes(notes.concat(newNoteObj));
-    setNewNote('add another note ...');
+    // setNotes(notes.concat(newNoteObj));
+
+    axios
+      .post('http://localhost:3001/notes', newNoteObj) // post writes to database
+      .then((response) => {
+        console.log(response);
+        setNewNote('');
+        setNotes(notes.concat(response.data)); // update state (not from the datbase)
+      });
   }
 
   function handleNoteChange(event) {
     event.preventDefault();
     setNewNote(event.target.value);
+  }
+
+  function toggleImportance(id) {
+    // find the note in state: array of notes
+    const note = notes.find((note) => note.id === id);
+
+    // create a new note with toggled importnace
+    const newNoteObj = {
+      ...note,
+      important: !note.important,
+    };
+
+    // update the database
+    axios
+      .put(`http://localhost:3001/notes/${id}`, newNoteObj)
+      .then((response) => {
+        console.log(response);
+        // then update state
+        // create a new array. never mutate state
+        const newNotes = notes.map((note) => {
+          if (note.id === id) {
+            return newNoteObj;
+          }
+          return note;
+        });
+        setNotes(newNotes);
+      });
   }
 
   return (
@@ -71,7 +97,7 @@ function App(props) {
       </div>
       <ul>
         {notesToShow.map((note) => (
-          <Note note={note} />
+          <Note note={note} onToggleImportance={toggleImportance} />
         ))}
         {/* {notes.map(note => <li key={note.id}>{note.content}</li>)} */}
 
