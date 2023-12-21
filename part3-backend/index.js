@@ -1,28 +1,45 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT
+const PASSWORD = process.env.PASSWORD
+const USER_NAME = process.env.USER_NAME
+const CLUSTER_NAME = process.env.CLUSTER_NAME
+
+
+const url = `mongodb+srv://${USER_NAME}:${PASSWORD}@${CLUSTER_NAME}/?retryWrites=true&w=majority`;
+mongoose.set('strictQuery',false)
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    important: true
-  },
-  {
-    id: 2,
-    content: "Browser can execute only JavaScript",
-    important: false
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    important: true
-  }
-]
+// let notes = [
+//   {
+//     id: 1,
+//     content: "HTML is easy",
+//     important: true
+//   },
+//   {
+//     id: 2,
+//     content: "Browser can execute only JavaScript",
+//     important: false
+//   },
+//   {
+//     id: 3,
+//     content: "GET and POST are the most important methods of HTTP protocol",
+//     important: true
+//   }
+// ]
 
 // middleware: use json parser
 app.use(express.json());
@@ -32,8 +49,16 @@ app.get('/', (request, response) => {
   response.send('Hola, amigo!!');
 });
 
+// v1 notes is local variable
+// app.get('/api/notes', (request, response) => {
+//   response.json(notes);
+// });
+
+// v2 get notes from mongo
 app.get('/api/notes', (request, response) => {
-  response.json(notes);
+  Note.find({}).then(notes => {
+    response.json(notes);
+  });
 });
 
 app.get('/api/notes/:id', (request, response) => {
