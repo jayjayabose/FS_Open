@@ -25,7 +25,7 @@ function App(props) {
   useEffect(() => {
     (async () => {
       try {
-        let response = await axios.get('http://localhost:3001/notes');
+        const response = await noteService.getAll();
         setNotes(response.data);
       } catch (error) {
         console.error('error: getting notes', error);
@@ -42,7 +42,7 @@ function App(props) {
     };
 
   try {
-    const response = await axios.post('http://localhost:3001/notes', newNoteObj); // post writes to database
+    const response = await noteService.create(newNoteObj); // post writes to database
     setNewNote('');
     setNotes(notes.concat(response.data)); // update state (not from the datbase)
   } catch (error) {
@@ -68,7 +68,7 @@ function App(props) {
 
     try {
       // update the database  
-      await axios.put(`http://localhost:3001/notes/${id}`, newNoteObj);
+      await noteService.udpate(id, newNoteObj);
   
       // then update state
       // create a new array. never mutate state

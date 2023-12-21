@@ -1,9 +1,13 @@
-const Note = ({note}) => {
+const Note = ({ note, onToggleImportance }) => {
+  const label = note.important ? 'make not important' : 'make important';
   return (
     <>
-      <li key={note.id}>{note.content}</li>
+      <li key={note.id}>
+        {/* notice function definition invocked callback passing id */}
+        {note.content} <button onClick={() => onToggleImportance(note.id)}>{label}</button>
+      </li>
     </>
-  )
-}
+  );
+};
 
-export default Note
+export default Note;
