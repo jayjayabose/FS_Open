@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const password = 'FJNdhMdwpDlfSi8t' // not the atlas password. db cluster password? seems if you lose it, create a new user
 const url = `mongodb+srv://jayabose:${password}@cluster0.4k9meiq.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -25,27 +24,15 @@ const note = new Note({
   important: true,
 })
 
-// note.save().then(result => {
-//   console.log('note saved!')
-//   mongoose.connection.close()
-// });
 
-// (function  () {
-//   console.log('iief')
-// })();
+const result = await Note.find({});
+result.forEach(note => {
+  console.log(note);
+});
 
-// (() => {
-  // console.log('iife')
-// })();
-
-// const result = await Note.find({});
-// result.forEach(note => {
-//   console.log(note);
-// });
-
-Note.find({}).then(result => {
-  result.forEach(note => {
-    console.log(note);
-  });
-  mongoose.connection.close();
-})
+// Note.find({}).then(result => {
+//   result.forEach(note => {
+//     console.log(note);
+//   });
+//   mongoose.connection.close();
+// })
