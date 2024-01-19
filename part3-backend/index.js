@@ -1,14 +1,12 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT
-const PASSWORD = process.env.PASSWORD
-const USER_NAME = process.env.USER_NAME
-const CLUSTER_NAME = process.env.CLUSTER_NAME
+
+const config = require('./utils/config');
+const logger = require('./utils/logger');
 
 
-const url = `mongodb+srv://${USER_NAME}:${PASSWORD}@${CLUSTER_NAME}/?retryWrites=true&w=majority`;
+const url = `mongodb+srv://${config.USER_NAME}:${config.PASSWORD}@${config.CLUSTER_NAME}/?retryWrites=true&w=majority`;
 mongoose.set('strictQuery',false)
 mongoose.connect(url);
 
@@ -99,7 +97,7 @@ app.post('/api/notes', (request, response) => {
   }
 
   notes = notes.concat(newNote);
-  console.log('create note', newNote)
+  logger.info('create note', newNote)
   response.status(200).json(notes);
 });
 
@@ -107,5 +105,5 @@ app.post('/api/notes', (request, response) => {
 app.use(unknownEndpoint)
 
 
-app.listen(PORT)
-console.log(`Server running on port: ${PORT}`);
+app.listen(config.PORT)
+logger.info(`Server running on port: ${config.PORT}`);
